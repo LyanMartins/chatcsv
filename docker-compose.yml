@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine # Use a lightweight Nginx image
+    ports:
+      - "8080:80" # Map host port 80 to container port 80
+    volumes:
+      - ./src:/var/www/html:ro # Mount your application code as read-only
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro # Mount the custom Nginx config
+    depends_on:
+      - php-fpm
+    networks:
+      - app-network
+
+  php-fpm:
+    build: 
+      dockerfile: Dockerfile # Use a custom Dockerfile to set up PHP-FPM
+    volumes:
+      - .:/var/www/html # Mount your application code 
+    networks:
+      - app-network
+      
+networks:
+  app-network:
+    driver: bridge

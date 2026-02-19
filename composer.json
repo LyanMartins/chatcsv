@@ -1,0 +1,17 @@
+{
+    "name": "lyanmartins/chatcsv",
+    "autoload": {
+        "psr-4": {
+            "Lyanmartins\\Chatcsv\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Lyan Martins",
+            "email": "lyan.martins3@gmail.com"
+        }
+    ],
+    "require": {
+        "google/apiclient": "^2.19"
+    }
+}

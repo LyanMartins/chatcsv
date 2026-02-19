@@ -1,0 +1,5 @@
+vendor/*
+vendor
+./secret.json
+secret.json
+.env
