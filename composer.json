@@ -13,6 +13,7 @@
     ],
     "require": {
         "google/apiclient": "^2.19",
-        "vlucas/phpdotenv": "^5.6"
+        "vlucas/phpdotenv": "^5.6",
+        "leafs/leaf": "^4.4"
     }
 }

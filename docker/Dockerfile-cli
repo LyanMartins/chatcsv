@@ -1,0 +1,26 @@
+
+FROM php:8.2-zts
+
+# Instala dependências necessárias para compilar extensões
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install zip
+
+# Instala extensão parallel
+RUN pecl install parallel \
+    && pecl install redis \
+    && docker-php-ext-enable parallel redis
+
+# (Opcional) Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY . .
+RUN composer install 
+
+# Define diretório padrão
+WORKDIR /var/www/html
+
+
+# Comando padrão
+CMD ["php", "./src/runtime.php"]

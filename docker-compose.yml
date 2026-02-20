@@ -7,15 +7,15 @@ services:
       - "8080:80" # Map host port 80 to container port 80
     volumes:
       - ./src:/var/www/html:ro # Mount your application code as read-only
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro # Mount the custom Nginx config
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro # Mount the custom Nginx config
     depends_on:
-      - php-fpm
+      - php
     networks:
       - app-network
 
-  php-fpm:
+  php:
     build: 
-      dockerfile: Dockerfile # Use a custom Dockerfile to set up PHP-FPM
+      dockerfile: ./docker/Dockerfile # Use a custom Dockerfile to set up PHP-FPM
     env_file:
       - .env
     volumes:
@@ -24,6 +24,23 @@ services:
         source: .env
         target: /var/www/html/.env # Adjust the target path to your app's working directory
         read_only: true # Recommended for security
+    networks:
+      - app-network
+
+  php-cli:
+    build: 
+      dockerfile: ./docker/Dockerfile-cli # Use a custom Dockerfile to set up PHP-FPM
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/html # Mount your application code 
+    networks:
+      - app-network
+      
+  redis:
+    image: redis:alpine # Use a lightweight Redis image
+    ports:
+      - "6379:6379" # Map host port 6379 to container port 6379
     networks:
       - app-network
       
