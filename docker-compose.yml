@@ -16,8 +16,14 @@ services:
   php-fpm:
     build: 
       dockerfile: Dockerfile # Use a custom Dockerfile to set up PHP-FPM
+    env_file:
+      - .env
     volumes:
-      - .:/var/www/html # Mount your application code 
+      - ./:/var/www/html # Mount your application code 
+      - type: bind
+        source: .env
+        target: /var/www/html/.env # Adjust the target path to your app's working directory
+        read_only: true # Recommended for security
     networks:
       - app-network
       
