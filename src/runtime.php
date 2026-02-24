@@ -2,30 +2,22 @@
 
 require_once 'vendor/autoload.php';
 
-
+// require '/var/www/html/vendor/autoload.php';
 
 use parallel\Runtime;
 
-$runtime = new Runtime();
-
-$secret = '../secret.json';
-
-$future = $runtime->run(function () {
-
-    require '/var/www/html/vendor/autoload.php';
-
-    echo gethostbyname('redis') . PHP_EOL;
+$spreadsheetId = $_ENV['GOOGLE_SPREADSHEET_ID'];
+$range = $_ENV['GOOGLE_SHEET_NAME'];
     
-    $redis = new Redis();
-    $redis->connect( gethostbyname('redis'), 6379);
-    $jsonData = $redis->get('messages');
-    //echo $jsonData;
-    if(!$jsonData){
-        return false;
-    }
+$redis = new Redis();
+$runtime = new Runtime();
+$redis->connect( gethostbyname('redis'), 6379);
+$redis->setOption(Redis::OPT_READ_TIMEOUT, -1);
 
-    $spreadsheetId = $_ENV['GOOGLE_SPREADSHEET_ID'];
-    $range = $_ENV['GOOGLE_SHEET_NAME'];
+$thread = function($spreadsheetId, $range, $jsonData){
+
+    // na criação da thread ele nao consegue ver o autoload, precisa forçar o require dentro da função
+    require '/var/www/html/vendor/autoload.php';
 
     $client = new Google\Client();
     //$client->setDeveloperKey($_ENV['GOOGLE_API_KEY']);
@@ -38,8 +30,26 @@ $future = $runtime->run(function () {
     $valueRange = new Google_Service_Sheets_ValueRange();
     $valueRange->setValues([(Array)$jsonData]??null);
 
-    $write = $service->spreadsheets_values->append($spreadsheetId, $range, $valueRange, ['valueInputOption' => 'RAW']);
+    $service->spreadsheets_values->append($spreadsheetId, $range, $valueRange, ['valueInputOption' => 'RAW']);
 
-});
+};
 
-echo $future->value();
+while (true) {
+    $data = $redis->blPop(['queue'], 0); // 0 = espera infinito
+    
+    if ($data) {
+        $queue = $data[0];
+        $message = json_decode($data[1])->message;
+
+        echo "Recebi: " . $message. PHP_EOL;
+
+        $future = $runtime->run($thread ,[$spreadsheetId, $range, $message]);
+        
+        echo $future->value();
+        // processa aqui
+    }
+}
+
+
+
+

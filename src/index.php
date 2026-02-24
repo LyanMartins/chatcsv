@@ -6,7 +6,7 @@ require_once '../vendor/autoload.php';
 app()->get('/', function () {
     $redis = new Redis();
     $redis->connect('redis', 6379);
-    $redis->set('messages', 'Hello from Redis!');
+    $redis->rPush('queue', json_encode(['message' => 1]));
     response()->json(['message' => 'Hello World!']);
 });
 
