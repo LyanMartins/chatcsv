@@ -1,50 +1,14 @@
 <?php
 
+use Chatcsv\Controller\ChatController;
+
+
 require_once '../vendor/autoload.php';
 
 
-app()->get('/', function () {
-    $redis = new Redis();
-    $redis->connect('redis', 6379);
-    $redis->rPush('queue', json_encode(['message' => 1]));
-    response()->json(['message' => 'Hello World!']);
-});
+app()->get('/message', [new ChatController(), 'getMessages']);
 
-app()->get('/teste', function () {
-    $redis = new Redis();
-    $redis->connect('redis', 6379);
-    $json_data = $redis->get('messages');
-    echo $json_data;
+app()->post('/message', [new ChatController(), 'sendMessage']);
 
-    $spreadsheetId = $_ENV['GOOGLE_SPREADSHEET_ID'];
-    $range = $_ENV['GOOGLE_SHEET_NAME'];
-
-    $client = new Google\Client();
-    //$client->setDeveloperKey($_ENV['GOOGLE_API_KEY']);
-    $client->setApplicationName('chatcsv');
-    $client->setAuthConfig('../secret.json');
-    $client->setScopes([Google\Service\Sheets::SPREADSHEETS]);
-
-    $service = new Google\Service\Sheets($client);
-
-
-    $response = $service->spreadsheets_values->get($spreadsheetId, $range);
-    $values = $response->getValues();  
-    
-    $values = ($values) ? array_push($values, [$json_data]) : [$json_data];
-
-    var_dump($values);
-
-    echo "<br>";
-    $valueRange = new Google_Service_Sheets_ValueRange();
-    $valueRange->setValues($values);
-
-    //$write = $service->spreadsheets_values->append($spreadsheetId, $range, $valueRange, ['valueInputOption' => 'RAW']);
-
-    $response = $service->spreadsheets_values->get($spreadsheetId, $range);
-    $values = $response->getValues();  
-
-    response()->json(['message' => 'Hello World!', 'details' => $json_data, 'spreadsheet_values' => $values]);
-});
 
 app()->run();

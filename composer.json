@@ -2,7 +2,7 @@
     "name": "lyanmartins/chatcsv",
     "autoload": {
         "psr-4": {
-            "Lyanmartins\\Chatcsv\\": "src/"
+            "Chatcsv\\": "src/"
         }
     },
     "authors": [

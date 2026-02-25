@@ -30,6 +30,8 @@ services:
   php-cli:
     build: 
       dockerfile: ./docker/Dockerfile-cli # Use a custom Dockerfile to set up PHP-FPM
+    depends_on:
+      - redis
     env_file:
       - .env
     volumes:
